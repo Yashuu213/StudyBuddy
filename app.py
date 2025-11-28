@@ -13,7 +13,7 @@ def load_data():
 data = load_data()
 
 # Gemini Setup
-GEMINI_API_KEY = 'Your Api Key'
+GEMINI_API_KEY = 'AIzaSyBidj9KOYX4XmlN6fwSPhOLBx9jRtS_7o4'
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
     model = genai.GenerativeModel('gemini-2.0-flash')
@@ -99,10 +99,10 @@ def generate_content():
     section = req_data.get('section') # 'explanation', 'board_qa', 'jee_qa', 'notes'
     
     prompts = {
-        'explanation': f"Explain the topic '{topic_name}' for a CBSE Class 11/12 student. Use very simple language, real-life analogies, and small examples. Make it deep but easy to understand.",
-        'board_qa': f"Provide 20 important Board Exam style questions and answers for the topic '{topic_name}'. Include past year questions if possible. Format clearly as Question 1: ... Answer: ...",
-        'jee_qa': f"Provide 10 important JEE Mains/Advanced level questions with detailed solutions for the topic '{topic_name}'. Focus on conceptual depth.",
-        'notes': f"Provide concise revision notes and important formulas for the topic '{topic_name}'."
+        'explanation': f"Explain the topic '{topic_name}' for a CBSE Class 11/12 student. Use extremely simple, easy-to-understand English suitable for students with low proficiency. Use real-life analogies, small examples, and break down complex concepts into very simple steps.",
+        'board_qa': f"Provide 20 important Board Exam style questions and answers for the topic '{topic_name}'. IMPORTANT: For every question, put the year/importance tag at the END of the question text, enclosed in double asterisks, e.g., 'What is the unit of force? **[CBSE 2019]**'. Format clearly.",
+        'jee_qa': f"Provide 10 important JEE Mains/Advanced level questions with detailed solutions for the topic '{topic_name}'. IMPORTANT: For every question, put the year/importance tag at the END of the question text, enclosed in double asterisks, e.g., 'Calculate the velocity... **[JEE Main 2020]**'. Focus on conceptual depth.",
+        'notes': f"Provide concise revision notes and important formulas for the topic '{topic_name}'. Use very simple language and bullet points for easy understanding."
     }
     
     prompt = prompts.get(section, f"Tell me about {topic_name}")
@@ -125,7 +125,7 @@ def ask_ai():
     context = req_data.get('context', '')
     print(f"Query: {query}")
     
-    prompt = f"Context: {context}\nStudent Question: {query}\nProvide a clear, helpful, and educational answer suitable for a high school student. If it's a doubt, solve it step-by-step."
+    prompt = f"Context: {context}\nStudent Question: {query}\nProvide a VERY SHORT, CONCISE, and IMPORTANT answer. Focus only on the key points. Avoid long explanations unless absolutely necessary. Keep it brief and to the point."
     
     try:
         response = model.generate_content(prompt)
@@ -143,7 +143,7 @@ def generate_quiz(topic_id):
     # We might want the topic name passed in or look it up, for simplicity let's assume client sends name
     topic_name = request.json.get('topic_name', topic_id)
     
-    prompt = f"Generate 5 multiple choice questions for the topic '{topic_name}' for CBSE Class 12 level. Return ONLY a JSON array of objects with keys: 'question', 'options' (array of 4 strings), 'correct_answer' (index 0-3)."
+    prompt = f"Generate 5 impactful and conceptual multiple choice questions for the topic '{topic_name}' for CBSE Class 12 level. Return ONLY a JSON array of objects with keys: 'question', 'options' (array of 4 strings), 'correct_answer' (index 0-3), and 'explanation' (string explaining the correct answer)."
     
     try:
         response = model.generate_content(prompt)

@@ -13,9 +13,10 @@ function initializeProgress() {
         studyTime: {},
         lastStudied: null,
         streak: 0,
-        totalTopics: 0
+        totalTopics: 0,
+        activityLog: []
     };
-    
+
     const saved = localStorage.getItem('cbse_progress');
     return saved ? JSON.parse(saved) : defaultProgress;
 }
@@ -33,12 +34,21 @@ function getProgress() {
 // Mark a topic as completed
 function markTopicComplete(topicId, topicName) {
     const progress = getProgress();
-    
+
     if (!progress.completedTopics.includes(topicId)) {
         progress.completedTopics.push(topicId);
         progress.lastStudied = new Date().toISOString();
+
+        // Add to activity log
+        if (!progress.activityLog) progress.activityLog = [];
+        progress.activityLog.push({
+            type: 'completion',
+            topicName: topicName,
+            date: new Date().toISOString()
+        });
+
         saveProgress(progress);
-        
+
         // Show completion notification
         showNotification(`✅ Completed: ${topicName}`, 'success');
     }
@@ -47,11 +57,11 @@ function markTopicComplete(topicId, topicName) {
 // Record quiz score
 function recordQuizScore(topicId, topicName, score, total) {
     const progress = getProgress();
-    
+
     if (!progress.quizScores[topicId]) {
         progress.quizScores[topicId] = [];
     }
-    
+
     progress.quizScores[topicId].push({
         score: score,
         total: total,
@@ -59,7 +69,18 @@ function recordQuizScore(topicId, topicName, score, total) {
         date: new Date().toISOString(),
         topicName: topicName
     });
-    
+
+    // Add to activity log
+    if (!progress.activityLog) progress.activityLog = [];
+    progress.activityLog.push({
+        type: 'quiz',
+        topicName: topicName,
+        score: score,
+        total: total,
+        percentage: Math.round((score / total) * 100),
+        date: new Date().toISOString()
+    });
+
     saveProgress(progress);
     showNotification(`Quiz Score: ${score}/${total} (${Math.round((score / total) * 100)}%)`, 'info');
 }
@@ -74,20 +95,20 @@ function calculateStats() {
         streak: calculateStreak(progress),
         recentActivity: getRecentActivity(progress)
     };
-    
+
     // Calculate average quiz score
     let totalScore = 0;
     let totalAttempts = 0;
-    
+
     Object.values(progress.quizScores).forEach(quizzes => {
         quizzes.forEach(quiz => {
             totalScore += quiz.percentage;
             totalAttempts++;
         });
     });
-    
+
     stats.averageScore = totalAttempts > 0 ? Math.round(totalScore / totalAttempts) : 0;
-    
+
     return stats;
 }
 
@@ -95,36 +116,23 @@ function calculateStats() {
 function calculateStreak(progress) {
     // Simple implementation: days since last studied
     if (!progress.lastStudied) return 0;
-    
+
     const lastDate = new Date(progress.lastStudied);
     const today = new Date();
     const diffTime = Math.abs(today - lastDate);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     return diffDays <= 1 ? (progress.streak || 1) : 0;
 }
 
 // Get recent activity
 function getRecentActivity(progress) {
-    const activities = [];
-    
-    // Add quiz activities
-    Object.entries(progress.quizScores).forEach(([topicId, quizzes]) => {
-        quizzes.forEach(quiz => {
-            activities.push({
-                type: 'quiz',
-                topicName: quiz.topicName || 'Unknown Topic',
-                score: quiz.score,
-                total: quiz.total,
-                percentage: quiz.percentage,
-                date: quiz.date
-            });
-        });
-    });
-    
+    // Return activity log if exists, otherwise fallback (or empty)
+    let activities = progress.activityLog || [];
+
     // Sort by date (most recent first)
     activities.sort((a, b) => new Date(b.date) - new Date(a.date));
-    
+
     return activities.slice(0, 10); // Return last 10 activities
 }
 
@@ -135,7 +143,7 @@ function getRecentActivity(progress) {
 function showProgress() {
     const stats = calculateStats();
     const progress = getProgress();
-    
+
     const container = document.getElementById('view-container');
     container.innerHTML = `
         <h1 style="margin-bottom: 2rem;">📊 Your Learning Progress</h1>
@@ -169,10 +177,12 @@ function showProgress() {
                             <div class="activity-info">
                                 <div class="activity-title">${activity.topicName}</div>
                                 <div class="activity-meta">
-                                    ${formatDate(activity.date)} • Quiz
+                                    ${formatDate(activity.date)} • ${activity.type === 'quiz' ? 'Quiz' : 'Completed'}
                                 </div>
                             </div>
-                            <div class="activity-score">${activity.percentage}%</div>
+                            <div class="activity-score">
+                                ${activity.type === 'quiz' ? activity.percentage + '%' : '✅'}
+                            </div>
                         </li>
                     `).join('')}
                 </ul>
@@ -198,7 +208,7 @@ function showProgress() {
             </div>
         </div>
     `;
-    
+
     updateBreadcrumb(['Progress']);
     updateNavActive('progress');
 }
@@ -214,7 +224,7 @@ function initializeSettings() {
         fontSize: 'medium',
         autoSave: true
     };
-    
+
     const saved = localStorage.getItem('cbse_settings');
     return saved ? JSON.parse(saved) : defaultSettings;
 }
@@ -233,7 +243,7 @@ function applySettings(settings) {
     } else {
         document.body.classList.remove('light-theme');
     }
-    
+
     // Apply font size
     document.body.classList.remove('font-small', 'font-medium', 'font-large');
     document.body.classList.add(`font-${settings.fontSize}`);
@@ -245,7 +255,7 @@ function applySettings(settings) {
 
 function showSettings() {
     const settings = initializeSettings();
-    
+
     const container = document.getElementById('view-container');
     container.innerHTML = `
         <h1 style="margin-bottom: 2rem;">⚙️ Settings</h1>
@@ -306,7 +316,7 @@ function showSettings() {
             </p>
         </div>
     `;
-    
+
     updateBreadcrumb(['Settings']);
     updateNavActive('settings');
 }
@@ -415,11 +425,11 @@ function formatDate(dateString) {
     const now = new Date();
     const diffTime = Math.abs(now - date);
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 0) return 'Today';
     if (diffDays === 1) return 'Yesterday';
     if (diffDays < 7) return `${diffDays} days ago`;
-    
+
     return date.toLocaleDateString();
 }
 
@@ -442,7 +452,7 @@ function showNotification(message, type = 'info') {
     `;
     notification.textContent = message;
     document.body.appendChild(notification);
-    
+
     // Remove after 3 seconds
     setTimeout(() => {
         notification.style.animation = 'slideOut 0.3s ease';
@@ -455,7 +465,7 @@ function updateNavActive(page) {
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
     });
-    
+
     const navItems = document.querySelectorAll('.nav-item');
     if (page === 'home' && navItems[0]) navItems[0].classList.add('active');
     if (page === 'progress' && navItems[1]) navItems[1].classList.add('active');
