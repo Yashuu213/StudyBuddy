@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CBSE Learning Hub</title>
+    <title>StudyBuddy - AI Learning Companion</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='progress-settings.css') }}">
     <style>
@@ -394,6 +394,72 @@
             margin-left: 10px;
             font-size: 0.9em;
         }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%);
+            border-radius: 24px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin-bottom: 2rem;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
     </style>
 </head>
 <body>
@@ -405,7 +471,7 @@
                 <path d="M22 10v6M2 10v6" />
                 <path d="M20 2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h15z" />
             </svg>
-            CBSE.AI
+            StudyBuddy
         </div>
         <ul class="nav-links">
             <li class="nav-item active" onclick="goHome()">Home</li>
@@ -496,7 +562,53 @@
             try {
                 const res = await fetch('/api/classes');
                 const classes = await res.json();
-                renderGrid(classes, 'Select Class', 'class');
+                
+                const container = document.getElementById('view-container');
+                let html = `
+                    <div class="hero-section glass">
+                        <div class="hero-content">
+                            <h1 class="hero-title">Welcome to StudyBuddy</h1>
+                            <p class="hero-subtitle">Your intelligent AI companion for mastering CBSE & JEE concepts. Start your learning journey today.</p>
+                            <div class="hero-stats">
+                                <div class="stat-item">
+                                    <span class="stat-value">AI-Powered</span>
+                                    <span class="stat-label">Personalized Learning</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">24/7</span>
+                                    <span class="stat-label">Doubt Support</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">Smart</span>
+                                    <span class="stat-label">Progress Tracking</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-header">
+                        <h2 class="section-title">Select Your Class</h2>
+                    </div>
+                    <div class="grid">
+                `;
+                
+                classes.forEach(item => {
+                    html += `
+                        <div class="card glass" onclick="loadSubjects('${item.id}')">
+                            <div style="width: 50px; height: 50px; background: rgba(56, 189, 248, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2">
+                                    <path d="M22 10v6M2 10v6" />
+                                    <path d="M20 2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h15z" />
+                                </svg>
+                            </div>
+                            <h3>${item.name}</h3>
+                            <p>Access comprehensive study materials, Q&A, and quizzes.</p>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                container.innerHTML = html;
+                
                 updateBreadcrumb([]);
             } catch (e) {
                 console.error(e);
