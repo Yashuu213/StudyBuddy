@@ -13,7 +13,7 @@ def load_data():
 data = load_data()
 
 # Gemini Setup
-GEMINI_API_KEY = 'AIzaSyBidj9KOYX4XmlN6fwSPhOLBx9jRtS_7o4'
+GEMINI_API_KEY = 'Your Api Key'
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
     model = genai.GenerativeModel('gemini-2.0-flash')
