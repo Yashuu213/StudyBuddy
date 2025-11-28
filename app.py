@@ -13,7 +13,7 @@ def load_data():
 data = load_data()
 
 # Gemini Setup
-GEMINI_API_KEY = 'Your Api Key'
+GEMINI_API_KEY = 'GEMINI_API_KEY'
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
     model = genai.GenerativeModel('gemini-2.0-flash')
@@ -61,8 +61,7 @@ def get_topics(class_id, subject_id, chapter_id):
 
 @app.route('/api/content/<class_id>/<subject_id>/<chapter_id>/<topic_id>')
 def get_content(class_id, subject_id, chapter_id, topic_id):
-    # In a real app, this would fetch from DB. Here we generate/mock it or use AI on the fly if needed.
-    # For now, we'll return a structure that the frontend expects, and we can use AI to fill it if requested.
+
     
     # Find the topic name
     topic_name = "Unknown Topic"

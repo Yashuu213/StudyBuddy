@@ -623,7 +623,38 @@
             try {
                 const res = await fetch(`/api/subjects/${classId}`);
                 const subjects = await res.json();
-                renderGrid(subjects, 'Select Subject', 'subject');
+                
+                const container = document.getElementById('view-container');
+                let html = `
+                    <div class="hero-section glass" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%);">
+                        <div class="hero-content">
+                            <h1 class="hero-title">Class ${classId}</h1>
+                            <p class="hero-subtitle">Select a subject to start exploring chapters and topics.</p>
+                        </div>
+                    </div>
+                    <div class="section-header">
+                        <h2 class="section-title">Subjects</h2>
+                    </div>
+                    <div class="grid">
+                `;
+                
+                subjects.forEach(item => {
+                    html += `
+                        <div class="card glass" onclick="loadChapters('${item.id}')">
+                            <div style="width: 50px; height: 50px; background: rgba(16, 185, 129, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                                </svg>
+                            </div>
+                            <h3>${item.name}</h3>
+                            <p>Explore chapters</p>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                container.innerHTML = html;
+
                 updateBreadcrumb(['Class ' + classId]);
             } catch (e) {
                 console.error(e);
@@ -638,7 +669,41 @@
             try {
                 const res = await fetch(`/api/chapters/${currentClass}/${subjectId}`);
                 const chapters = await res.json();
-                renderGrid(chapters, 'Select Chapter', 'chapter');
+                
+                const container = document.getElementById('view-container');
+                let html = `
+                    <div class="hero-section glass" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.2) 100%);">
+                        <div class="hero-content">
+                            <h1 class="hero-title">${subjectId}</h1>
+                            <p class="hero-subtitle">Class ${currentClass} • Select a chapter to view topics.</p>
+                        </div>
+                    </div>
+                    <div class="section-header">
+                        <h2 class="section-title">Chapters</h2>
+                    </div>
+                    <div class="grid">
+                `;
+                
+                chapters.forEach(item => {
+                    html += `
+                        <div class="card glass" onclick="loadTopics('${item.id}')">
+                            <div style="width: 50px; height: 50px; background: rgba(245, 158, 11, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                    <polyline points="14 2 14 8 20 8" />
+                                    <line x1="16" y1="13" x2="8" y2="13" />
+                                    <line x1="16" y1="17" x2="8" y2="17" />
+                                    <polyline points="10 9 9 9 8 9" />
+                                </svg>
+                            </div>
+                            <h3>${item.name}</h3>
+                            <p>View topics</p>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                container.innerHTML = html;
+
                 updateBreadcrumb(['Class ' + currentClass, subjectId]);
             } catch (e) {
                 console.error(e);
@@ -653,7 +718,39 @@
             try {
                 const res = await fetch(`/api/topics/${currentClass}/${currentSubject}/${chapterId}`);
                 const topics = await res.json();
-                renderGrid(topics, 'Select Topic', 'topic');
+                
+                const container = document.getElementById('view-container');
+                let html = `
+                    <div class="hero-section glass" style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(219, 39, 119, 0.2) 100%);">
+                        <div class="hero-content">
+                            <h1 class="hero-title">${chapterId}</h1>
+                            <p class="hero-subtitle">${currentSubject} • Select a topic to start learning.</p>
+                        </div>
+                    </div>
+                    <div class="section-header">
+                        <h2 class="section-title">Topics</h2>
+                    </div>
+                    <div class="grid">
+                `;
+                
+                topics.forEach(item => {
+                    html += `
+                        <div class="card glass" onclick="loadContent('${item.id}', '${item.name.replace(/'/g, "\'")}')">
+                            <div style="width: 50px; height: 50px; background: rgba(236, 72, 153, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="12" y1="16" x2="12" y2="12" />
+                                    <line x1="12" y1="8" x2="12.01" y2="8" />
+                                </svg>
+                            </div>
+                            <h3>${item.name}</h3>
+                            <p>Start Learning</p>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                container.innerHTML = html;
+
                 updateBreadcrumb(['Class ' + currentClass, currentSubject, chapterId]);
             } catch (e) {
                 console.error(e);
@@ -913,6 +1010,7 @@
 
             if (selected === correct) {
                 btn.classList.add('correct');
+                btn.classList.add('user-correct');
             } else {
                 btn.classList.add('wrong');
                 buttons[correct].classList.add('correct');
@@ -924,7 +1022,7 @@
         }
 
         function finishQuiz(total) {
-            const correct = document.querySelectorAll('.option-btn.correct').length;
+            const correct = document.querySelectorAll('.option-btn.user-correct').length;
             if (typeof recordQuizScore === 'function') {
                 recordQuizScore(currentTopic, currentTopicName, correct, total);
             }
